@@ -25,15 +25,25 @@
   [p]
   p)
 
-(defn range->x [i] (* (/ i num-cells) width))
-(defn range->y [j] (* (/ j num-cells) height))
+(defn irange->x
+  [i]
+  (let [cell-width (/ width num-cells)]
+    (* (+ i 0.5)
+       cell-width)))
+
+(defn irange->y
+  [j]
+  (let [cell-height (/ height num-cells)]
+    (* (+ j 0.5)
+       cell-height)))
+
 
 (defn cell-pos
   []
   (let [half (/ num-cells 2)]
     (for [i (range (- half) half)
           j (range (- half) half)]
-      [(range->x i) (range->y j)])))
+      [(irange->x i) (irange->y j)])))
 
 (defn pos->screen
   [[x y]]
@@ -43,7 +53,7 @@
 (defn draw-field-pos
   [pos]
   (let [[x y] (pos->screen pos)]
-    (q/ellipse x y 2 2)))
+    (q/ellipse x y 5 5)))
 
 (defn draw-state [state]
   ; Clear the sketch by filling it with light-grey color.
