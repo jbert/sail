@@ -13,7 +13,7 @@
 ;; Our arena is a world with the origin at the centre
 (def width (/ screen-width pixels-per-metre 2))
 (def height (/ screen-height pixels-per-metre 2))
-(def num-cells 11)
+(def num-cells 51)
 
 (defn irange->x
   [i]
@@ -37,19 +37,20 @@
 (defn safe-atan
   [x y]
   (let [epsilon 1e-9]
-    (if (< x epsilon)
-      (if (pos? y)
-        (/ Math/PI 2)
-        (- (/ Math/PI 2)))
-      (Math/atan (/ y x)))))
+    (if (< (Math/abs x) epsilon)
+      (let [pi2 (/ Math/PI 2)]
+        (if (pos? y)
+          pi2
+          (- pi2)))
+        (Math/atan (/ y x)))))
 
 (defn scalar-field
   [[x y] tick]
   (let [theta (+ (safe-atan x y)
                  (* Math/PI
                     (/ tick (* 5 ticks-per-sec))))]
-    (math/sqrt (* (Math/abs (Math/sin theta))
-                  (+ (* x x)
+    (* (Math/abs (Math/sin theta))
+       (math/sqrt (+ (* x x)
                      (* y y))))))
 
 (defn setup []
