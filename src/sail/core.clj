@@ -11,7 +11,7 @@
 ;; Our arena is a world with the origin at the centre
 (def width (/ screen-width pixels-per-metre 2))
 (def height (/ screen-height pixels-per-metre 2))
-(def num-cells 50)
+(def num-cells 10)
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
@@ -26,7 +26,7 @@
 (defn irange->x
   [i]
   (let [cell-width (/ width num-cells)]
-    (* (+ i 0.5)
+    (* i
        cell-width)))
 
 (defn irange->y
