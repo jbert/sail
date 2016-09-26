@@ -11,28 +11,18 @@
 ;; Our arena is a world with the origin at the centre
 (def width (/ screen-width pixels-per-metre 2))
 (def height (/ screen-height pixels-per-metre 2))
-(def num-cells 10)
-
-(defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 1)
-  {:tick 0
-   :range-ref (atom [0 screen-width])})
-
-(defn update-state [state]
-  ; Update sketch state by changing circle color and position.
-  (update state :tick inc))
+(def num-cells 11)
 
 (defn irange->x
   [i]
   (let [cell-width (/ width num-cells)]
-    (* i
+    (* (+ i 0.5)
        cell-width)))
 
 (defn irange->y
   [j]
   (let [cell-height (/ height num-cells)]
-    (* j
+    (* (+ j 0.5)
        cell-height)))
 
 (defn cell-pos
@@ -42,21 +32,38 @@
           j (range (- half) half)]
       [(irange->x i) (irange->y j)])))
 
-(defn pos->screen
-  [[x y]]
-  [(* screen-width (+ (/ x width) 0.5))
-   (* screen-height (+ (/ y height) 0.5))])
-
 (defn scalar-field
   [[x y]]
   (math/sqrt (+ (* x x)
                 (* y y))))
+
+(defn setup []
+  (q/frame-rate 1)
+  (let [field-vals (map scalar-field (cell-pos))]
+    {:tick 0
+     :range-ref (atom [(apply min field-vals) (apply max field-vals)])}))
+
+(defn update-state [state]
+  ; Update sketch state by changing circle color and position.
+  (update state :tick inc))
+
+(defn pos->screen
+  [[x y]]
+  [(* screen-width (+ (/ x width) 0.5))
+   (* screen-height (+ (/ y height) 0.5))])
 
 (defn field->colour
   [minv maxv v]
   (let [intensity (* 255 (/ (- v minv) maxv))]
     [intensity intensity intensity]))
 
+(defn centered-rect
+  "Same as quil/rect, but x y is the box centre"
+  [cx cy w h]
+  (q/rect (- cx (/ w 2))
+          (- cy (/ h 2))
+          w
+          h))
 
 (defn draw-field-pos
   [min-val max-val f pos]
@@ -64,11 +71,10 @@
         box-width (/ screen-width num-cells)
         box-height (/ screen-width num-cells)
         current-val (f pos)]
-;    (q/ellipse x y 5 5)))
+    ;    (q/ellipse x y 5 5)))
     (q/with-fill (field->colour min-val max-val current-val)
-      (q/rect x y box-width box-height))
+      (centered-rect x y box-width box-height))
     current-val))
-    
 
 (defn draw-state [state]
   ; Clear the sketch by filling it with light-grey color.
