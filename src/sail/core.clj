@@ -1,5 +1,6 @@
 (ns sail.core
   (:require [quil.core :as q]
+            [clojure.math.numeric-tower :as math]
             [quil.middleware :as m]))
 
 (def screen-width 400)
@@ -10,20 +11,17 @@
 ;; Our arena is a world with the origin at the centre
 (def width (/ screen-width pixels-per-metre 2))
 (def height (/ screen-height pixels-per-metre 2))
-(def num-cells 10)
+(def num-cells 50)
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
   (q/frame-rate 1)
-  {:time 0})
+  {:tick 0
+   :range-ref (atom [0 screen-width])})
 
 (defn update-state [state]
   ; Update sketch state by changing circle color and position.
-  (update state :time inc))
-
-(defn scalar-field
-  [p]
-  p)
+  (update state :tick inc))
 
 (defn irange->x
   [i]
@@ -34,9 +32,8 @@
 (defn irange->y
   [j]
   (let [cell-height (/ height num-cells)]
-    (* (+ j 0.5)
+    (* j
        cell-height)))
-
 
 (defn cell-pos
   []
@@ -50,22 +47,43 @@
   [(* screen-width (+ (/ x width) 0.5))
    (* screen-height (+ (/ y height) 0.5))])
 
+(defn scalar-field
+  [[x y]]
+  (math/sqrt (+ (* x x)
+                (* y y))))
+
+(defn field->colour
+  [minv maxv v]
+  (let [intensity (* 255 (/ (- v minv) maxv))]
+    [intensity intensity intensity]))
+
+
 (defn draw-field-pos
-  [pos]
-  (let [[x y] (pos->screen pos)]
-    (q/ellipse x y 5 5)))
+  [min-val max-val f pos]
+  (let [[x y] (pos->screen pos)
+        box-width (/ screen-width num-cells)
+        box-height (/ screen-width num-cells)
+        current-val (f pos)]
+;    (q/ellipse x y 5 5)))
+    (q/with-fill (field->colour min-val max-val current-val)
+      (q/rect x y box-width box-height))
+    current-val))
+    
 
 (defn draw-state [state]
   ; Clear the sketch by filling it with light-grey color.
-  (q/background 240)
-  (q/stroke 0 0 0)
-;  (doseq
-;    [] 
-;    draw-field-pos
-;    (cell-pos)))
-  (doseq
-    [pos (cell-pos)]
-    (draw-field-pos pos)))
+  (let [range-ref (:range-ref state)]
+    (q/background 240)
+    (q/stroke 0 0 0)
+    ;  (doseq
+    ;    [] 
+    ;    draw-field-pos
+    ;    (cell-pos)))
+    (let [[min-val max-val] (deref range-ref)
+          new-vals (map #(draw-field-pos min-val max-val scalar-field %) (cell-pos))]
+      (swap! range-ref (fn [old-val] [(apply min new-vals) (apply max new-vals)])))))
+;      [pos (cell-pos)]
+;      (draw-field-pos (ref max-val-ref) scalar-field pos))))
 
 (q/defsketch sail
   :title "You spin my circle right round"
