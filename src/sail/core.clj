@@ -3,8 +3,8 @@
             [clojure.math.numeric-tower :as math]
             [quil.middleware :as m]))
 
-(def screen-width 400)
-(def screen-height 400)
+(def screen-width 800)
+(def screen-height 800)
 
 (def pixels-per-metre 1)
 
@@ -42,24 +42,33 @@
         (if (pos? y)
           pi2
           (- pi2)))
-        (Math/atan (/ y x)))))
+      (Math/atan (/ y x)))))
+
+;(defn scalar-field
+;  [tick [x y]]
+;  (let [v (+ x y)]
+;    (+ v (Math/sin (/ v 2)))))
 
 (defn scalar-field
-  [[x y] tick]
-  (let [theta (+ (safe-atan x y)
-                 (* Math/PI
-                    (/ tick (* 5 ticks-per-sec))))]
-    (* (Math/abs (Math/sin theta))
-       (math/sqrt (+ (* x x)
-                     (* y y))))))
+  [tick [x y]]
+  (let [theta (* Math/PI 2 (/ x width))
+        gamma (* Math/PI 2 (/ y height))
+        phi (/ (* Math/PI 2 (/ tick ticks-per-sec)) 5)]
+    (+ (Math/sin (+ phi (* 3 (+ theta))))
+       (Math/sin (+ phi (* 3 (+ gamma)))))))
 
-(defn vector-field
-  [[x y] tick]
-  [5 5])
+;(defn scalar-field
+;  [tick [x y]]
+;  (let [theta (+ (safe-atan x y)
+;                 (* Math/PI
+;                    (/ tick (* 5 ticks-per-sec))))]
+;    (* (Math/abs (Math/sin theta))
+;       (math/sqrt (+ (* x x)
+;                     (* y y))))))
 
 (defn setup []
   (q/frame-rate ticks-per-sec)
-  (let [field-vals (map #(scalar-field % 0) (cell-pos))]
+  (let [field-vals (map #(scalar-field 0 %) (cell-pos))]
     {:tick 0
      :range-ref (atom [(apply min field-vals) (apply max field-vals)])}))
 
@@ -88,48 +97,38 @@
           h))
 
 (defn vec-scale
-  [{x :x y :y :as px} scale]
-  (if (nil? px)
-    {:x 0 :y 0}
-    (conj px {:x (* x scale)
-              :y (* y scale)})))
+  [[x y] scale]
+  [(* x scale) (* y scale)])
 
 (defn vec-add
-  ([px] px)
-  ([px py]
-  (if (nil? py)
-    px
-    (if (nil? px)
-      {:x 0 :y 0}
-      (conj px {:x (+ (:x px) (:x py))
-                :y (+ (:y px) (:y py))})))))
+  [[ax ay] [bx by]]
+  [(+ ax bx) (+ ay by)])
 
-(defn vec-subtract
-  [px py]
-  (vec-add px (vec-scale py -1)))
+(defn vector-derivative
+  [tick sf pos]
+  (let [epsilon 1
+        sample-points (map #(vec-scale % epsilon) [[1 0] [0 1] [-1 0] [0 -1]])
+        sval (sf tick pos)
+        deltas (map #(vec-scale % (/ (- (sf tick (vec-add pos %))
+                                        sval)
+                                     epsilon))
+                    sample-points)]
+    (reduce vec-add deltas)))
 
-(defn vec-length
-  [px]
-  (if (nil? px)
-    0
-    (math/sqrt (+ (* (:x px) (:x px))
-                  (* (:y px) (:y px))))))
-
-(defn vec-normalise
-  [{x :x y :y :as px}]
-  (let [length (vec-length px())]
-    (if (= length 0)
-      {:x 0 :y 0}
-      (vec-scale px (/ 1 length)))))
+;(defn vector-field
+;  [tick [x y]]
+;  [5 5])
 
 (defn quil-draw-vec
   [cx cy [vx vy]]
+  (q/ellipse cx cy 2 2)
   (q/line cx cy (+ cx vx) (+ cy vy)))
 
 (defn draw-vector-field-at-pos
   [[x y] vval]
   (q/with-stroke [255 0 0]
-    (quil-draw-vec x y vval)))
+    (q/with-fill [255 0 0]
+      (quil-draw-vec x y (vec-scale vval 100)))))
 
 (defn draw-scalar-field-at-pos
   [[x y] sval [min-val max-val]]
@@ -144,8 +143,9 @@
     (q/background 240)
     (q/stroke 0 0 0)
     (let [tick (:tick state)
-          new-vals (map #(let [sval (scalar-field % tick)
-                               vval (vector-field % tick)
+          new-vals (map #(let [sval (scalar-field tick %)
+;                               vval (vector-field tick %)
+                               vval (vector-derivative tick scalar-field %)
                                screen-pos (pos->screen %)]
                            (draw-scalar-field-at-pos screen-pos sval (deref range-ref))
                            (draw-vector-field-at-pos screen-pos vval)
