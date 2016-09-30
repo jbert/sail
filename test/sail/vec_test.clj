@@ -17,4 +17,9 @@
     (is (= (v/length (v/make-vec 0 5)) 5))
     (is (= (v/length (v/make-vec 5 0)) 5))
     (is (= (v/length (v/make-vec 3 4)) 5))
-    (is (= (v/length (v/make-vec 5 12)) 13))))
+    (is (= (v/length (v/make-vec 5 12)) 13)))
+  (testing "Polar length tests"
+    (is (= (v/length (v/to-polr (v/make-vec 0 5))) 5))
+    (is (= (v/length (v/to-polr (v/make-vec 5 0))) 5))
+    (is (= (v/length (v/to-polr (v/make-vec 3 4))) 5))
+    (is (= (v/length (v/to-polr (v/make-vec 5 12))) 13))))

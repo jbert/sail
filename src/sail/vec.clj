@@ -10,7 +10,7 @@
   [x y]
   {:x x :y y})
 
-(defn cart-or-polr
+(defn cart-polr-dispatch
   [{x :x y :y r :r t :t} & args ]
   (if (nil? x)
     :polr
@@ -44,7 +44,7 @@
 (defmacro cart-and-polr
   [fn-name arglist cart-impl polr-impl]
   `(do
-     (defmulti ~fn-name cart-or-polr)
+     (defmulti ~fn-name cart-polr-dispatch)
      (defmethod ~fn-name
        :cart
        [{x :x y :y} ~@arglist]
@@ -60,7 +60,6 @@
   [s]
   {:x (* s x) :y (* s y)}
   {:r (* r s) :t t})
-
 
 (cart-and-polr
   length
