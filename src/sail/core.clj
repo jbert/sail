@@ -66,10 +66,16 @@
 ;       (math/sqrt (+ (* x x)
 ;                     (* y y))))))
 
+(defn make-boat
+  [name x y]
+  {:name name
+   :pos [x y]})
+
 (defn setup []
   (q/frame-rate ticks-per-sec)
   (let [field-vals (map #(scalar-field 0 %) (cell-pos))]
     {:tick 0
+     :boat (make-boat "Badger" 0 0)
      :range-ref (atom [(apply min field-vals) (apply max field-vals)])}))
 
 (defn update-state [state]
@@ -95,14 +101,6 @@
           (- cy (/ h 2))
           w
           h))
-
-(defn vec-scale
-  [[x y] scale]
-  [(* x scale) (* y scale)])
-
-(defn vec-add
-  [[ax ay] [bx by]]
-  [(+ ax bx) (+ ay by)])
 
 (defn vector-derivative
   [tick sf pos]
@@ -143,23 +141,23 @@
     (q/background 240)
     (q/stroke 0 0 0)
     (let [tick (:tick state)
-          new-vals (map #(let [sval (scalar-field tick %)
-;                               vval (vector-field tick %)
-                               vval (vector-derivative tick scalar-field %)
-                               screen-pos (pos->screen %)]
-                           (draw-scalar-field-at-pos screen-pos sval (deref range-ref))
-                           (draw-vector-field-at-pos screen-pos vval)
-                           sval)
-                        (cell-pos))]
-      (swap! range-ref (fn [old-val] [(apply min new-vals) (apply max new-vals)])))))
+;          new-vals (map #(let [sval (scalar-field tick %)
+;                               vval (vector-derivative tick scalar-field %)
+;                               screen-pos (pos->screen %)]
+;                           (draw-scalar-field-at-pos screen-pos sval (deref range-ref))
+;                           (draw-vector-field-at-pos screen-pos vval)
+;                           sval)
+;                        (cell-pos))]
+;      (swap! range-ref (fn [old-val] [(apply min new-vals) (apply max new-vals)])))))
+          ])))
 
-(q/defsketch sail
-  :title "You spin my circle right round"
-  :size [screen-width screen-height]
-  :setup setup
-  :update update-state
-  :draw draw-state
-  :middleware [m/fun-mode])
+;(q/defsketch sail
+;  :title "You spin my circle right round"
+;  :size [screen-width screen-height]
+;  :setup setup
+;  :update update-state
+;  :draw draw-state
+;  :middleware [m/fun-mode])
 
 
 (defn -main

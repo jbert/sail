@@ -10,7 +10,32 @@ DONE - add drawing of a vector field
 
 DONE - compute vector field as a function of the scalar
 
+- write a vec type
+    - seamlessly + lazily moves from cartesian to polar
+
+- add a sail:
+    - line segment
+    - calculate force on the line segment from the vector field
+
+- add a boat:
+    - mass
+    - centre of mass
+    - fix the sail to the boat  (two points)
+        - calculate the force applied to the boat
+        - translational and rotational
+            - 
+
+- turn forces into velocities
+
+- add a keel
+    - suppresses (all? most?) component of 
+
+- work out keyboard input
+    - add a rudder
+    - allow setting l+r
+    - derive force on boat from rudder
+        (needs boat speed, so maybe do that first)
+
 - add 2d perlin noise field (0 -> 1.0)
 
 - make it 3d and use tick as 3rd dimension
-
