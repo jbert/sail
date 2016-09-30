@@ -1,6 +1,7 @@
 (ns sail.core
   (:require [quil.core :as q]
             [clojure.math.numeric-tower :as math]
+            [sail.vec :as v]
             [quil.middleware :as m]))
 
 (def screen-width 800)
@@ -105,13 +106,13 @@
 (defn vector-derivative
   [tick sf pos]
   (let [epsilon 1
-        sample-points (map #(vec-scale % epsilon) [[1 0] [0 1] [-1 0] [0 -1]])
+        sample-points (map #(v/scale % epsilon) [[1 0] [0 1] [-1 0] [0 -1]])
         sval (sf tick pos)
-        deltas (map #(vec-scale % (/ (- (sf tick (vec-add pos %))
+        deltas (map #(v/scale % (/ (- (sf tick (v/add pos %))
                                         sval)
                                      epsilon))
                     sample-points)]
-    (reduce vec-add deltas)))
+    (reduce v/add deltas)))
 
 ;(defn vector-field
 ;  [tick [x y]]
@@ -126,7 +127,7 @@
   [[x y] vval]
   (q/with-stroke [255 0 0]
     (q/with-fill [255 0 0]
-      (quil-draw-vec x y (vec-scale vval 100)))))
+      (quil-draw-vec x y (v/scale vval 100)))))
 
 (defn draw-scalar-field-at-pos
   [[x y] sval [min-val max-val]]
