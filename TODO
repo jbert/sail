@@ -1,0 +1,16 @@
+DONE - fix cell offset
+
+DONE - fix 1st frame
+    - have cell walker which returns values
+    - pass in helper to act on each cell to draw
+
+DONE - find a scalar field which changes over time
+
+DONE - add drawing of a vector field
+
+DONE - compute vector field as a function of the scalar
+
+- add 2d perlin noise field (0 -> 1.0)
+
+- make it 3d and use tick as 3rd dimension
+
