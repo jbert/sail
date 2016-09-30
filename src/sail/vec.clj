@@ -40,40 +40,33 @@
                     (* y y)))
    :t (xy-to-theta x y)})
 
-(defmulti scale cart-or-polr)
-(defmethod scale
-  :cart
-  [{x :x y :y} scale]
-  {:x (* scale x) :y (* scale y)})
-(defmethod scale
-  :polr
-  [{r :r t :t} scale]
-  {:r (* r scale) :t t})
+;(defmacro cart-and-polr [fn-name arglist cart-impl polr-impl] `((defn ~fn-name [] 1) `(defn foo [] 1)))
+(defmacro cart-and-polr
+  [fn-name arglist cart-impl polr-impl]
+  `(do
+     (defmulti ~fn-name cart-or-polr)
+     (defmethod ~fn-name
+       :cart
+       [{x :x y :y} ~@arglist]
+       ~cart-impl)
+     (defmethod ~fn-name
+       :polr
+       [{r :r t :t} ~@arglist]
+       ~polr-impl)))
 
-;(defn scale
-;  [{x :x y :y r :r t :t} scale]
-;  (if (nil? x)
-;    {:r (* r scale) :t t}
-;    {:x (* scale x) :y (* scale y)}))
 
-(defmulti length cart-or-polr)
-(defn length-polr
-  [{r :r t :t}]
+(cart-and-polr
+  scale
+  [s]
+  {:x (* s x) :y (* s y)}
+  {:r (* r s) :t t})
+
+
+(cart-and-polr
+  length
+  []
+  (length (to-polr {:x x :y y}))
   r)
-(defmethod length
-  :cart
-  [v]
-  ((comp length-polr to-polr) v))
-(defmethod length
-  :polr
-  [& args]
-  (apply length-polr args))
-;(defn length
-;  [{x :x y :y r :r t :t}]
-;  (if (nil? x)
-;    r
-;    (math/sqrt (+ (* x x) (* y y)))))
-
 
 (defn add
   [vx vy]
