@@ -11,10 +11,12 @@
   {:x x :y y})
 
 (defn cart-polr-dispatch
-  [{x :x y :y r :r t :t} & args ]
-  (if (nil? x)
-    :polr
-    :cart))
+  [{x :x y :y r :r t :t last-conv :last-conv} & args ]
+  (if (not (nil? last-conv))
+    last-conv
+    (if (nil? x)
+      :polr
+      :cart)))
 
 (defn xy-to-theta
   [x y]
@@ -34,13 +36,43 @@
           atanyx
           (+ atanyx Math/PI))))))
 
-(defn to-polr
-  [{x :x y :y}]
-  {:r (math/sqrt (+ (* x x)
-                    (* y y)))
-   :t (xy-to-theta x y)})
+(defn to-cart
+  [{x :x y :y r :r t :t :as v}]
+  (if (not (nil? x))
+    v
+    {:last-conv :cart 
+     :r r
+     :t t
+     :x (* r (Math/cos t))
+     :y (* r (Math/sin t))}))
 
-;(defmacro cart-and-polr [fn-name arglist cart-impl polr-impl] `((defn ~fn-name [] 1) `(defn foo [] 1)))
+(defn to-polr
+  [{x :x y :y r :r t :t :as v}]
+  (if (not (nil? r))
+    v
+    {:last-conv :polr
+     :r (math/sqrt (+ (* x x)
+                      (* y y)))
+     :t (xy-to-theta x y)
+     :x x
+     :y y}))
+
+(defn approx=
+  [a b]
+  (let [epsilon 1e-9]
+    (< (- a b)
+       epsilon)))
+
+(defn equal
+  [a b]
+  (let [ca (to-cart a)
+        cb (to-cart b)]
+;    (println "JB" (float (:x ca)) (float (:x cb))
+;             (float (:y ca)) (float (:y cb)))
+    (and (approx= (float (:x ca)) (float (:x cb)))
+         (approx= (float (:y ca)) (float (:y cb))))))
+
+; Easy way to declare multimethod for cartesion and polar representations
 (defmacro cart-and-polr
   [fn-name arglist cart-impl polr-impl]
   `(do
@@ -54,7 +86,6 @@
        [{r :r t :t} ~@arglist]
        ~polr-impl)))
 
-
 (cart-and-polr
   scale
   [s]
@@ -67,6 +98,10 @@
   (length (to-polr {:x x :y y}))
   r)
 
-(defn add
-  [vx vy]
-  )
+(cart-and-polr
+  add
+  [b]
+  (let [cb (to-cart b)]
+    {:x (+ x (:x cb))
+     :y (+ y (:y cb))})
+  (add (to-cart {:r r :t t}) b))

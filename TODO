@@ -10,10 +10,10 @@ DONE - add drawing of a vector field
 
 DONE - compute vector field as a function of the scalar
 
-- write a vec type
-    - seamlessly + lazily moves from cartesian to polar
+DONE - write a vec type
+    DONE - seamlessly + lazily moves from cartesian to polar
 
-    - find a way to compare 0 and 0.0 equal for tests
+    DONE - find a way to compare 0 and 0.0 equal for tests
 
 - add a sail:
     - line segment
