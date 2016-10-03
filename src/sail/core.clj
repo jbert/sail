@@ -105,12 +105,12 @@
 
 (defn vector-derivative
   [tick sf pos]
-  (let [epsilon 1
-        sample-points (map #(v/scale % epsilon) [[1 0] [0 1] [-1 0] [0 -1]])
+  (let [step 1
+        sample-points (map #(v/scale % step) [[1 0] [0 1] [-1 0] [0 -1]])
         sval (sf tick pos)
         deltas (map #(v/scale % (/ (- (sf tick (v/add pos %))
-                                        sval)
-                                     epsilon))
+                                      sval)
+                                   step))
                     sample-points)]
     (reduce v/add deltas)))
 
