@@ -105,3 +105,9 @@
     {:x (+ x (:x cb))
      :y (+ y (:y cb))})
   (add (to-cart {:r r :t t}) b))
+
+(cart-and-polr
+  turn
+  [theta]
+  (turn (to-polr {:x x :y y}) theta)
+  {:r r :t (+ t theta)})

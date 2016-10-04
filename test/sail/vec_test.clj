@@ -72,3 +72,9 @@
     (is (v/equal (v/add vr0-1 v0-1) (v/make-vec 0 2)))
     (is (v/equal (v/add vr0-1 v1-0) (v/make-vec 1 1)))))
 
+(def pi4 (/ Math/PI 4))
+(def pi2 (/ Math/PI 2))
+
+(deftest vec-turn-test
+  (testing "cartesian"
+    (is (v/equal (v/turn v1-0 pi2) (v/make-vec 0 1)))))
