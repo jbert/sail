@@ -69,20 +69,45 @@
 ;                     (* y y))))))
 
 (defn make-boat
-  [name x y]
+  [name pos dir]
   {:name name
-   :pos (v/make-vec x y)})
+   :pos pos
+   :dir dir
+   :length (/ screen-width 10)
+   :width (/ screen-width 40)
+   })
 
 (defn setup []
   (q/frame-rate ticks-per-sec)
   (let [field-vals (map #(scalar-field 0 %) (cell-pos))]
     {:tick 0
-     :boat (make-boat "Badger" 0 0)
+     :boat (make-boat "Badger" (v/make-vec 0 0) (v/make-vec 1 0))
      :range-ref (atom [(apply min field-vals) (apply max field-vals)])}))
 
-(defn update-state [state]
-  ; Update sketch state by changing circle color and position.
-  (update state :tick inc))
+(defn handle-keypress
+  [keypress interval boat]
+  (let [radians-per-second (/ Math/PI 5)
+        radians-per-keypress (/ radians-per-second ticks-per-sec)]
+    (cond
+      (= keypress :left)
+      (update boat :dir v/turn radians-per-keypress)
+      (= keypress :right)
+      (update boat :dir v/turn (- radians-per-keypress))
+      :else
+      boat)))
+
+(defn update-boat
+  [b]
+  (if (q/key-pressed?)
+    (handle-keypress (q/key-as-keyword) (/ 1 ticks-per-sec) b)
+    b))
+
+
+(defn update-state
+  [state]
+  (-> state
+      (update :tick inc)
+      (update :boat update-boat)))
 
 (defn pos->screen
   [pos]
@@ -129,6 +154,30 @@
     (q/ellipse x y 2 2)
     (q/line x y (+ x vx) (+ y vy))))
 
+(defn draw-boat
+  [b]
+  (let [{x :x y :y} (pos->screen (v/to-cart (:pos b)))
+        {theta :t} (v/to-polr (:dir b))]
+    (q/with-translation [x y]
+      (q/with-rotation [theta]
+        (q/with-stroke [0 0 255]
+          (q/with-fill [0 0 255]
+            (let [wb (/ (:width b) 1.5)
+                  ws (/ wb 2)
+                  l2 (/ (:length b) 2)
+                  l4 (/ l2 2)
+                  bow [l2 0]
+                  s+ [(- l2) ws]
+                  s- [(- l2) (- ws)]
+                  b+ [0 wb]
+                  b- [0 (- wb)]]
+              (apply q/line (concat bow b+))
+              (apply q/line (concat b+ s+))
+              (apply q/line (concat s+ s-))
+              (apply q/line (concat s- b-))
+              (apply q/line (concat b- bow)))))))))
+
+
 (defn draw-vector-field-at-pos
   [pos vval]
   (q/with-stroke [255 0 0]
@@ -153,10 +202,11 @@
           new-vals (map #(let [sval (scalar-field tick %)
                                vval (vector-derivative tick scalar-field %)
                                screen-pos (pos->screen %)]
-                           (draw-scalar-field-at-pos screen-pos sval (deref range-ref))
-                           (draw-vector-field-at-pos screen-pos vval)
+;                           (draw-scalar-field-at-pos screen-pos sval (deref range-ref))
+;                           (draw-vector-field-at-pos screen-pos vval)
                            sval)
                         (cell-pos))]
+      (draw-boat (:boat state))
       (swap! range-ref (fn [old-val] [(apply min new-vals) (apply max new-vals)])))))
   ;        ])))
 
