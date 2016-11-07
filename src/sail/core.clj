@@ -85,7 +85,7 @@
      :range-ref (atom [(apply min field-vals) (apply max field-vals)])}))
 
 (defn handle-keypress
-  [keypress interval boat]
+  [keypress boat]
   (let [radians-per-second (/ Math/PI 5)
         radians-per-keypress (/ radians-per-second ticks-per-sec)]
     (cond
@@ -99,7 +99,7 @@
 (defn update-boat
   [b]
   (if (q/key-pressed?)
-    (handle-keypress (q/key-as-keyword) (/ 1 ticks-per-sec) b)
+    (handle-keypress (q/key-as-keyword) b)
     b))
 
 
