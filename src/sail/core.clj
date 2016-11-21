@@ -9,7 +9,7 @@
 
 (def pixels-per-metre 1)
 
-(def ticks-per-sec 1)
+(def ticks-per-sec 10)
 (def num-cells 21)
 
 ;; Our arena is a world with the origin at the centre
@@ -73,6 +73,7 @@
   {:name name
    :pos pos
    :dir dir
+   :velocity (v/make-vec 0 0)
    :length (/ screen-width 10)
    :width (/ screen-width 40)
    })
@@ -85,22 +86,37 @@
      :range-ref (atom [(apply min field-vals) (apply max field-vals)])}))
 
 (defn handle-keypress
-  [keypress boat]
+  [boat keypress]
   (let [radians-per-second (/ Math/PI 5)
-        radians-per-keypress (/ radians-per-second ticks-per-sec)]
+        metres-per-s2 2
+        radians-per-keypress (/ radians-per-second ticks-per-sec)
+        metres-per-sec-per-keypress (/ metres-per-s2 ticks-per-sec)
+        accelerate (fn [v factor]
+                     (let [deltav (v/scale (v/normalise (:dir boat))
+                                           (* factor metres-per-sec-per-keypress))]
+                       (println "JB - v" v)
+                       (println "JB - deltav" deltav)
+                       (v/add v deltav)))]
+
     (cond
       (= keypress :left)
-      (update boat :dir v/turn radians-per-keypress)
+      {:dir (v/turn (:dir boat) (- radians-per-keypress))}
       (= keypress :right)
-      (update boat :dir v/turn (- radians-per-keypress))
+      {:dir (v/turn (:dir boat) radians-per-keypress)}
+      (= keypress :up)
+      {:velocity (accelerate (:velocity boat) 1)}
+      (= keypress :down)
+      {:velocity (accelerate (:velocity boat) -1)}
       :else
-      boat)))
+      {})))
 
 (defn update-boat
   [b]
-  (if (q/key-pressed?)
-    (handle-keypress (q/key-as-keyword) b)
-    b))
+  (let [new_pos (v/add (:pos b) (:velocity b))
+        b (if (q/key-pressed?)
+            (conj b (handle-keypress b (q/key-as-keyword)))
+            b)]
+    (conj b {:pos new_pos})))
 
 
 (defn update-state

@@ -111,3 +111,7 @@
   [theta]
   (turn (to-polr {:x x :y y}) theta)
   {:r r :t (+ t theta)})
+
+(defn normalise
+  [v]
+  (scale v (/ 1 (length v))))
