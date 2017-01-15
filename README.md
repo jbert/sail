@@ -1,18 +1,12 @@
 # sail
 
-A Quil sketch designed to ... well, that part is up to you.
+A learning clojure project.
 
-## Usage
-
-LightTable - open `core.clj` and press `Ctrl+Shift+Enter` to evaluate the file.
-
-Emacs - run cider, open `core.clj` and press `C-c C-k` to evaluate the file.
-
-REPL - run `(require 'sail.core)`.
+Try to model forces on a boat. Using Quil for drawing.
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2016-2017
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
