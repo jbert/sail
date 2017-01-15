@@ -8,6 +8,7 @@
 (def v1-0 (v/make-vec 1 0))
 (def v1-1 (v/make-vec 1 1))
 (def v0-5 (v/make-vec 0 5))
+(def v2-0 (v/make-vec 2 0))
 (def v5-0 (v/make-vec 5 0))
 (def v3-4 (v/make-vec 3 4))
 (def v5-12 (v/make-vec 5 12))
@@ -78,3 +79,21 @@
 (deftest vec-turn-test
   (testing "cartesian"
     (is (v/equal (v/turn v1-0 pi2) (v/make-vec 0 1)))))
+
+(deftest vec-dot
+  (testing "dot product"
+    (is (= (v/dot v0-0 v1-0) 0))
+    (is (= (v/dot v1-0 v1-0) 1))
+    (is (= (v/dot v0-1 v1-0) 0))
+    (is (= (v/dot v0-1 v1-1) 1))
+    (is (= (v/dot v1-1 (v/make-vec -1 1)) 0))))
+
+(deftest vec-projection
+  (testing "vector projection"
+    (is (v/equal (v/projection v1-0 v5-0)
+                 v5-0))
+    (is (v/equal (v/projection v1-0 v2-0)
+                 v2-0))
+    (is (v/equal (v/projection v1-0 v0-1)
+                 v0-0))
+ /   ))

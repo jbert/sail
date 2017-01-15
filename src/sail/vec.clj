@@ -115,3 +115,17 @@
 (defn normalise
   [v]
   (scale v (/ 1 (length v))))
+
+(cart-and-polr
+  dot
+  [b]
+  (+ (* x (:x b))
+     (* y (:y b)))
+  (dot (to-cart {:r r :t t} b)))
+
+(defn projection
+  "Projection of b in the direction of v"
+  [v b]
+  (let [vnorm (normalise v)]
+    (scale vnorm
+           (dot vnorm b))))

@@ -1,5 +1,24 @@
 - sort out x/y/radians-dir etc
 
+- add velocity component from vector field (current)
+    - decay velocity component perpendicular to direction
+        (keel effect)
+    - actually this depends on the current!
+    - interesting function it should take into account the difference between current and boat velocity
+    - and the constant of proportionality should depend on angle (cos theta?)
+
+- put together a few different current fields
+    - whirlpool
+    - basic left to right
+    - left-to-right with angle changing over time
+
+- draw currents on/off
+    - keyboard command
+
+- keyboard command (and button?) to change current patterns (and show currents)
+
+- add (optional?) docstring to cart-and-polr macro
+
 DONE - fix cell offset
 
 DONE - fix 1st frame
